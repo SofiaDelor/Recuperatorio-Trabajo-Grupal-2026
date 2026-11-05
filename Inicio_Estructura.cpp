@@ -1,4 +1,3 @@
-
 #ifndef INICIO_ESTRUCTURA_H
 #define INICIO_ESTRUCTURA_H
 
@@ -11,16 +10,16 @@
 #define MEDIO 150
 #define POCO 85
 
-
 typedef struct {
-	char fecha_actual[FECHA];
-	char opcion_excursion; //elige A B o C según la excursion que desea realizar
-	float presupuesto;  // presupuesto del usuario para la excursión
-	int cant_personas;  // cantidad de personas para realizar un calculo de presupuesto con el que cuenta el cliente
-	bool disponibilidad;  // disponibilidad para las fechas va de la mano de fecha de actual
+    char fecha_actual[FECHA];
+    char opcion_excursion; // Elige A, B o C
+    float presupuesto;     // Presupuesto unitario del usuario
+    int cant_personas;     // Cantidad de personas
+    bool disponibilidad;   // Disponibilidad (true/false)
 } Excursion;
 
-void mostrar_excursiones (Excursion datos);
-void disponibilidad (Excursion *datos);
-void presupuestoSafari (Excursion datos);
+void mostrar_excursiones(void);
+void disponibilidad(Excursion* datos);
+void presupuestoSafari(Excursion* datos);
+
 #endif
