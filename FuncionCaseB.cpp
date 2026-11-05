@@ -1,67 +1,55 @@
 #ifndef CASEB
 #define CASEB
+
 #include "Inicio_Estructura.h"
 
-void disponibilidad(Excursion *datos) {
-  
-	printf("\n");
-    printf("**************************************************\n");
+void disponibilidad(Excursion* datos) {
+    printf("\n**************************************************\n");
     printf("           CONSULTA DE DISPONIBILIDAD:\n");
     printf("**************************************************\n");
-    printf("\nIngrese la fecha actual (dd/mm): ");
-	scanf("%s", datos->fecha_actual);
+    printf("\nIngrese la fecha a consultar (dd/mm): ");
+    scanf("%6s", datos->fecha_actual);
 
-	int dia, mes;
-	if (sscanf(datos->fecha_actual, "%d/%d", &dia, &mes) != 2) {
-		printf("[ERROR] Formato de fecha ingresada incorrecta. Debe ser dd/mm.\n");
-		return;
-	}
+    int dia, mes;
+    if (sscanf(datos->fecha_actual, "%d/%d", &dia, &mes) != 2) {
+        printf("[ERROR] Formato de fecha ingresada incorrecta. Debe ser dd/mm.\n");
+        return;
+    }
 
-	FILE* archivo = fopen("excursiones1.txt", "r"); 
-	FILE* archivo_disponible = fopen("fechas_disponibles.txt", "w"); 
-	FILE* archivo_no_disponible = fopen("fechas_no_disponibles.txt", "w");
+    FILE* archivo = fopen("excursiones1.txt", "r");
+    if (archivo == NULL) {
+        printf("[ERROR] No se pudo abrir el archivo excursiones1.txt\n");
+        return;
+    }
 
-	if (archivo == NULL || archivo_disponible == NULL || archivo_no_disponible == NULL) { 
-		printf("[ERROR] No se pudo abrir uno o varios archivos.\n");
-		if (archivo) fclose(archivo);
-		if (archivo_disponible) fclose(archivo_disponible);
-		if (archivo_no_disponible) fclose(archivo_no_disponible);
+    Excursion reg;
+    int disp;
+    bool encontrada = false;
 
-		return;
+    printf("\n-.-.-.- DISPONIBILIDAD DE FECHAS DE LAS EXCURSIONES .-.-.-.-\n");
 
-	}
+    // Lectura registro por registro de la estructura
+    while (fscanf(archivo, "%6s %c %f %d %d", reg.fecha_actual, &reg.opcion_excursion, &reg.presupuesto, &reg.cant_personas, &disp) == 5) {
+        reg.disponibilidad = (bool)disp;
 
-	int dia_archivo, mes_archivo; 
-	char dm;  
+        int dia_reg, mes_reg;
+        if (sscanf(reg.fecha_actual, "%d/%d", &dia_reg, &mes_reg) == 2) {
+            if (dia == dia_reg && mes == mes_reg) {
+                encontrada = true;
+                datos->disponibilidad = reg.disponibilidad;
+                printf("Fecha [%s] - Excursión %c: %s\n",
+                    reg.fecha_actual,
+                    reg.opcion_excursion,
+                    reg.disponibilidad ? "DISPONIBLE" : "NO DISPONIBLE");
+            }
+        }
+    }
 
-		printf("-.-.-.- DISPONIBILIDAD DE FECHAS DE LAS EXCURSIONES: .-.-.-");
+    if (!encontrada) {
+        printf("No se encontraron registros para la fecha %s.\n", datos->fecha_actual);
+    }
 
-		while ((dm = fgetc(archivo)) != EOF) { 
-			if (dm == '-') { 
-				if (fscanf(archivo, "%d/%d", &dia_archivo, &mes_archivo) == 2) {
-					printf("Fecha [%02d/%02d]\n ", dia_archivo, mes_archivo);
+    fclose(archivo);
+}
 
-					if (mes < mes_archivo || (mes == mes_archivo && dia < dia_archivo)) { 
-						printf("Disponible en esa fecha.\n");
-						fprintf(archivo_disponible, "%02d/%02d\n", dia_archivo, mes_archivo);
-						datos->disponibilidad = true;
-					}
-					else if (mes > mes_archivo || (mes == mes_archivo && dia > dia_archivo)) { 
-						printf("NO Disponible en esa fecha, lo sentimos"\n");
-						fprintf(archivo_no_disponible, "%02d/%02d\n", dia_archivo, mes_archivo);
-						datos->disponibilidad = false; 
-					}
-					else {
-						printf("Es hoy. ¡Reserve los últimos cupos para una experiencia inolvidable!\n");
-						fprintf(archivo_disponible, "- %02d/%02d (HOY)\n", dia_archivo, mes_archivo);
-						datos->disponibilidad = true; 
-					}
-				}
-			}
-		}
-
-		fclose(archivo);
-		fclose(archivo_disponible);
-		fclose(archivo_no_disponible);
-	}
 #endif
