@@ -1,75 +1,52 @@
-#ifndef CASEC
-#define CASEC
+#ifndef CASEC_LISTARCONDICION_H
+#define CASEC_LISTARCONDICION_H
 
 #include "Inicio_Estructura.h"
 
-void presupuestoSafari(Excursion* datos) {
-    printf("**************************************************\n");
-    printf("             ¿CUAL ES SU PRESUPUESTO?:\n");
-    printf("**************************************************\n");
-
-    printf("\nIngrese la fecha (dd/mm): ");
-    scanf("%6s", datos->fecha_actual);
-
-    printf("Ingrese el tipo de excursión deseada (A, B o C): ");
-    scanf(" %c", &datos->opcion_excursion);
-    datos->opcion_excursion = (char)toupper((unsigned char)datos->opcion_excursion);
-
-    printf("Ingrese su presupuesto disponible por persona en USD: ");
-    scanf("%f", &datos->presupuesto);
-
-    printf("Ingrese la cantidad de personas que participan: ");
-    scanf("%d", &datos->cant_personas);
-
-    float total = datos->presupuesto * datos->cant_personas;
-
-    printf("\n-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n");
-    printf("              RESUMEN DEL PRESUPUESTO:\n");
-    printf("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n");
-    printf("Presupuesto disponible: %.2f USD\n", datos->presupuesto);
-    printf("Cantidad de personas: %d\n", datos->cant_personas);
-    printf("Monto acumulado total: %.2f USD\n", total);
-
-    printf("\n-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n");
-    printf("          EXCURSIONES SEGÚN SU PRESUPUESTO:\n");
-    printf("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\n");
-
-    if (total >= TODO) {
-        printf("\n- Safari de día completo en vehículo 4x4.\n");
-        printf("- Inmersión en jaula con tiburones.\n");
-        printf("- Avistamiento de ballenas en embarcación.\n");
-        datos->disponibilidad = true;
-    }
-    else if (total >= MEDIO) {
-        printf("\n- Inmersión en jaula con tiburones.\n");
-        printf("- Avistamiento de ballenas en embarcación.\n");
-        datos->disponibilidad = true;
-    }
-    else if (total >= POCO) {
-        printf("\n- Avistamiento de ballenas en embarcación.\n");
-        datos->disponibilidad = true;
-    }
-    else {
-        printf("No puede realizar ninguna excursión con ese presupuesto.\n");
-        datos->disponibilidad = false;
+void listar_por_condicion(const char* nombre_archivo) {
+    FILE* archivo = fopen(nombre_archivo, "r");
+    if (archivo == NULL) {
+        printf("[ERROR] No se pudo abrir el archivo '%s'.\n", nombre_archivo);
+        return;
     }
 
-    // ALTA DE REGISTRO EN EL ARCHIVO
-    FILE* archivo = fopen("excursiones1.txt", "a");
-    if (archivo != NULL) {
-        fprintf(archivo, "%s %c %.2f %d %d\n",
-            datos->fecha_actual,
-            datos->opcion_excursion,
-            datos->presupuesto,
-            datos->cant_personas,
-            datos->disponibilidad ? 1 : 0);
+    float min_presupuesto;
+    printf("\n--- FILTRADO POR CONDICION ---\n");
+    printf("Mostrar excursiones con presupuesto mayor o igual a (USD): ");
+    if (scanf("%f", &min_presupuesto) != 1) {
+        printf("[ERROR] Ingrese un valor numerico valido.\n");
+        limpiar_buffer();
         fclose(archivo);
-        printf("\n[ALTA DE REGISTRO] Datos guardados exitosamente en 'excursiones1.txt'.\n");
+        return;
     }
-    else {
-        printf("\n[ERROR] No se pudo escribir en el archivo de datos.\n");
+    limpiar_buffer();
+
+    Excursion reg;
+    int disp_int;
+    int coincidentes = 0;
+
+    printf("\n--- REGISTROS CON PRESUPUESTO >= $%.2f ---\n", min_presupuesto);
+    printf("%-20s %-6s %-10s %-15s %-12s\n", "CLIENTE", "TIPO", "PERSONAS", "PRESUPUESTO", "DISPONIBLE");
+    printf("-------------------------------------------------------------------------\n");
+
+    while (fscanf(archivo, "%49s %c %d %f %d",
+        reg.cliente, &reg.tipo_excursion, &reg.cant_personas, &reg.presupuesto, &disp_int) == 5) {
+        if (reg.presupuesto >= min_presupuesto) {
+            reg.disponible = (bool)disp_int;
+            printf("%-20s %-6c %-10d $%-14.2f %-12s\n",
+                reg.cliente,
+                reg.tipo_excursion,
+                reg.cant_personas,
+                reg.presupuesto,
+                reg.disponible ? "SI" : "NO");
+            coincidentes++;
+        }
     }
+
+    printf("-------------------------------------------------------------------------\n");
+    printf("Registros que cumplen la condicion: %d\n", coincidentes);
+
+    fclose(archivo);
 }
 
-#endif
-
+#endif // CASEC_LISTARCONDICION_H
