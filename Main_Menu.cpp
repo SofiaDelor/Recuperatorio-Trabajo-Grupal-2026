@@ -1,37 +1,60 @@
 #include "Inicio_Estructura.h"
+#include "CaseA_Agregar.h"
+#include "CaseB_ListarTodo.h"
+#include "CaseC_ListarCondicion.h"
+#include "CaseD_BuscarEspecial.h"
+#include "CaseE_DividirBooleano.h"
 
-int main() {
-    Excursion datos = { "", 'A', 0.0f, 0, false };
+void mostrar_menu(void) {
+    printf("\n======================================================\n");
+    printf("        SISTEMA DE GESTION DE EXCURSIONES            \n");
+    printf("======================================================\n");
+    printf("1. Agregar un registro al archivo\n");
+    printf("2. Listar todo el archivo por pantalla\n");
+    printf("3. Listar registros por condicion\n");
+    printf("4. Busqueda especifica \n");
+    printf("5. Dividir archivo segun disponibilidad\n");
+    printf("6. Salir del sistema\n");
+    printf("======================================================\n");
+}
+
+int main(void) {
+    int opcion = 0;
 
     do {
-        printf("\nMENU PRINCIPAL - EXCURSIONES EN SUDAFRICA.\n");
-        printf("(A) Información de excursiones (Lectura de registros).\n");
-        printf("(B) Disponibilidad de fechas.\n");
-        printf("(C) Sacar presupuesto y registrar (Alta de registro).\n");
-        printf("(D) Salir del menu.\n");
+        mostrar_menu();
+        printf("Seleccione una opcion (1-6): ");
+        if (scanf("%d", &opcion) != 1) {
+            printf("[ERROR] Entrada invalida. Por favor ingrese un numero.\n");
+            limpiar_buffer();
+            continue;
+        }
+        limpiar_buffer();
 
-        printf("\nIngresar una opción: ");
-        scanf(" %c", &datos.opcion_excursion);
-        datos.opcion_excursion = (char)toupper((unsigned char)datos.opcion_excursion);
-
-        switch (datos.opcion_excursion) {
-        case 'A':
-            mostrar_excursiones();
+        switch (opcion) {
+        case 1:
+            agregar_registro(ARCHIVO_ORIGEN);
             break;
-        case 'B':
-            disponibilidad(&datos);
+        case 2:
+            listar_todo(ARCHIVO_ORIGEN);
             break;
-        case 'C':
-            presupuestoSafari(&datos);
+        case 3:
+            listar_por_condicion(ARCHIVO_ORIGEN);
             break;
-        case 'D':
-            printf("Finalizando programa...\n");
+        case 4:
+            buscar_especifica(ARCHIVO_ORIGEN);
+            break;
+        case 5:
+            dividir_archivo_por_booleano(ARCHIVO_ORIGEN, ARCHIVO_DISPONIBLES, ARCHIVO_NO_DISPONIBLES);
+            break;
+        case 6:
+            printf("\nSaliendo del sistema de gestion...\n");
             break;
         default:
-            printf("Opción no válida.\n");
+            printf("\n[ERROR] Opcion fuera de rango (1-6).\n");
             break;
         }
-    } while (datos.opcion_excursion != 'D');
+    } while (opcion != 6);
 
     return 0;
 }
